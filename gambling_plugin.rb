@@ -18,22 +18,26 @@ class GamblingPlugin
     end
   end
 
+  def self.mods_only name, block
+    mod_command defn name, block
+  end
+
   Config = YAML.load_file('./jaggcoins_config.yaml')
 
   match /jaggcoins$/,     # Explanation of the betting system
   method: (defn :explanation, ->(m) { m.reply Config['explanation'] })
 
   match /bets\sopen$/,    # Opening a round of betting
-  method: (mod_command defn :bets_open, -> m { enable_betting })
+  method: (mods_only :bets_open, -> m { enable_betting })
 
   match /bets\sclosed$/,  # Closing the round of betting
-  method: (mod_command defn :bets_closed, -> m { disable_betting })
+  method: (mods_only :bets_closed, -> m { disable_betting })
 
   match /game\swin$/,     # Recording the game outcome as a victory
-  method: (mod_command defn :record_win, -> m { Scoreboard.add_win })
+  method: (mods_only :record_win, -> m { Scoreboard.add_win })
 
   match /game\slose$/,    # Recording the game outcome as a loss
-  method: (mod_command defn :record_loss, -> m { Scoreboard.add_loss })
+  method: (mods_only :record_loss, -> m { Scoreboard.add_loss })
 
   private
 
