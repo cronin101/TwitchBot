@@ -22,10 +22,6 @@ bot = Cinch::Bot.new do
     c.channels        = [creds['channel']]
     c.plugins.plugins = [GamblingPlugin]
   end
-
-  on :message, "hello" do |m|
-    m.reply "Hello #{m.user.nick}!"
-  end
 end
 
 bot.start
