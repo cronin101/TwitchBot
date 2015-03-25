@@ -6,7 +6,7 @@ class GamblingPlugin
   include Cinch::Plugin
 
   attr_accessor :accept_bets
-  #
+
   # Decorator to make commands fire only if triggered by a moderator
   def self.mod_command method_name
     method_name.tap do |name|
