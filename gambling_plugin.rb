@@ -32,12 +32,12 @@ class GamblingPlugin
 
     match /bet\svictory\s(\d+)$/i, method: :bet_win
     match /bet\swin\s(\d+)$/i,  # Betting on a victory
-      method: (defn :bet_win, ->(m, amount) { handle_user_bet(m, true, amount) })
+      method: (defn :bet_win, ->(m, amount) { m.reply handle_user_bet(true, amount) })
 
     match /bet\sloss\s(\d+)$/i, method: :bet_lose
     match /bet\sdefeat\s(\d+)$/i, method: :bet_lose
     match /bet\slose\s(\d+)$/i,  # Betting on a loss
-      method: (defn :bet_lose, ->(m, amount) { handle_user_bet(m, false, amount) })
+      method: (defn :bet_lose, ->(m, amount) { m.reply handle_user_bet(false, amount) })
 
     match /balance$/,
       method: (defn :balance, -> m { m.reply balance_for(m.user.name) })
@@ -100,23 +100,21 @@ class GamblingPlugin
     end
   end
 
-  BetResponse = Struct.new(:success, :message)
   def handle_user_bet(m, on_victory, amount)
     user = m.user.name
     if amount.to_i.zero?
-      m.reply "#{user}: Don't be afraid to dream a little bigger, darling."
-      return
+      return "#{user}: Don't be afraid to dream a little bigger, darling."
     end
     if self.accept_bets
-      result = BetHandler.handle_bet(user, on_victory, amount, BetResponse)
+      result = BetHandler.handle_bet(user, on_victory, amount)
       if result.success
-        m.reply result.message
+        return result.message
       else
-        m.reply "#{user}: #{result.message}"
+        return "#{user}: #{result.message}"
       end
 
     else
-      m.reply "#{user}: Betting is currently closed!"
+      return "#{user}: Betting is currently closed!"
     end
   end
 

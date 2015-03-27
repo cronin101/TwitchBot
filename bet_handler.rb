@@ -55,14 +55,15 @@ module BetHandler
     return [status] << "#{total.(bets_for)} jaggCoins placed on Victory (average: #{average.(bets_for)}), #{total.(bets_against)} placed on Defeat (average: #{average.(bets_against)})!"
   end
 
-  def handle_bet(username, on_victory, amount, response_class)
+  Response = Struct.new(:success, :message)
+  def handle_bet(username, on_victory, amount)
     amount = amount.to_i
 
     # User needs to be found or created.
     user = User.get(username)
 
     if Bet.where(round: self.current_round, user_id: user.id).any?
-      return response_class.new.tap do |r|
+      return Response.new.tap do |r|
         r.success = false
         r.message = "Sorry, you can only bet once per round!"
       end
@@ -80,14 +81,14 @@ module BetHandler
       user.coins -= amount
       user.save
 
-      return response_class.new.tap do |r|
+      return Response.new.tap do |r|
         r.success = true
-        r.message = "#{user.name}: Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"
+        r.message = "Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"
       end
 
     else
 
-      return response_class.new.tap do |r|
+      return Response.new.tap do |r|
         r.success = false
         r.message = "Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."
       end
