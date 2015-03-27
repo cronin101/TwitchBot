@@ -5,7 +5,36 @@ class BetHandlerTest < Minitest::Unit::TestCase
   # In-Memory Table
   DB = Sequel.sqlite
 
-  Response = Struct.new(:success, :message)
+  def test_rounds_for_and_against
+    with_clean_db do
+      BetHandler.start_new_round
+
+      assert_equal 0, BetHandler.instance_eval { this_round.count }
+      assert_equal 0, BetHandler.instance_eval { bets_for.count }
+      assert_equal 0, BetHandler.instance_eval { bets_against.count }
+
+      resp = BetHandler.handle_bet "optimist", true, 1
+      assert resp.success
+
+      assert_equal 1, BetHandler.instance_eval { this_round.count }
+      assert_equal 1, BetHandler.instance_eval { bets_for.count }
+      assert_equal 0, BetHandler.instance_eval { bets_against.count }
+
+      resp = BetHandler.handle_bet "pessimist", false, 1
+      assert resp.success
+
+      assert_equal 2, BetHandler.instance_eval { this_round.count }
+      assert_equal 1, BetHandler.instance_eval { bets_for.count }
+      assert_equal 1, BetHandler.instance_eval { bets_against.count }
+
+      BetHandler.start_new_round
+
+      assert_equal 0, BetHandler.instance_eval { this_round.count }
+      assert_equal 0, BetHandler.instance_eval { bets_for.count }
+      assert_equal 0, BetHandler.instance_eval { bets_against.count }
+    end
+  end
+
   def test_handle_bet_only_allows_one_bet
     with_clean_db do
       BetHandler.start_new_round
@@ -35,7 +64,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
       remaining = 0
       valid_wager = valid_user.coins - remaining
       response = BetHandler.handle_bet(valid_user.name, true, valid_wager)
-      assert response.success, response.message
+      assert response.success
 
       # The valid person should now have lighter pockets
       valid_user.reload

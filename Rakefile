@@ -1,4 +1,4 @@
-require_relative './database.rb'
+require_relative './gambling/database.rb'
 
 require 'rake/testtask'
 

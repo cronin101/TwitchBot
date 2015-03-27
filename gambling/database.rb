@@ -1,7 +1,7 @@
 require 'sequel'
 require 'sqlite3'
 
-DB = Sequel.sqlite('jaggerous.db')
+DB = Sequel.sqlite( __dir__ + '/jaggerous.db')
 
 class User < Sequel::Model(:users)
   def self.create_table?

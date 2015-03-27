@@ -1,7 +1,7 @@
 require 'cinch'
 require 'yaml'
 
-require_relative 'gambling_plugin.rb'
+require_relative './gambling/plugin.rb'
 
 # Twitch is special, deciding not to properly implement IRC.
 # Therefore, we need to monkey-patch Cinch :-(

@@ -23,15 +23,15 @@ module BetHandler
     this_round.where(is_on_victory: false)
   end
 
-  def payout(m, victory)
+  def payout(victory)
     bets = victory ? bets_for : bets_against
-    bets.each do |bet|
+    bets.map do |bet|
       payout = 2 * bet.amount
       user = User.find(id: bet.user_id)
       user.coins += payout
       user.save
 
-      m.reply "#{user.name}: You now have #{user.coins} jaggCoins! (+ #{bet.amount})"
+      "#{user.name}: You now have #{user.coins} jaggCoins! (+ #{bet.amount})"
     end
 
   end
@@ -55,7 +55,7 @@ module BetHandler
     return [status] << "#{total.(bets_for)} jaggCoins placed on Victory (average: #{average.(bets_for)}), #{total.(bets_against)} placed on Defeat (average: #{average.(bets_against)})!"
   end
 
-  Response = Struct.new(:success, :message)
+  Response = Struct.new(:success, :messages)
   def handle_bet(username, on_victory, amount)
     amount = amount.to_i
 
@@ -65,7 +65,7 @@ module BetHandler
     if Bet.where(round: self.current_round, user_id: user.id).any?
       return Response.new.tap do |r|
         r.success = false
-        r.message = "Sorry, you can only bet once per round!"
+        r.messages = ["Sorry, you can only bet once per round!"]
       end
     end
 
@@ -83,14 +83,14 @@ module BetHandler
 
       return Response.new.tap do |r|
         r.success = true
-        r.message = "Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"
+        r.messages = ["Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"]
       end
 
     else
 
       return Response.new.tap do |r|
         r.success = false
-        r.message = "Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."
+        r.messages = ["Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."]
       end
     end
   end
