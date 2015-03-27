@@ -1,4 +1,4 @@
-require 'minitest/autorun'
+require_relative './test_helper.rb'
 require_relative '../gambling/bet_handler.rb'
 
 class BetHandlerTest < Minitest::Unit::TestCase
