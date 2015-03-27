@@ -3,6 +3,38 @@ require_relative '../gambling/bet_handler.rb'
 
 class BetHandlerTest < Minitest::Unit::TestCase
 
+  def test_summariser
+    temporarily do
+      BetHandler.start_new_round
+
+      a = User.get 'a'
+      b = User.get 'b'
+
+      no_bets = BetHandler.summarise_round
+
+      BetHandler.start_new_round
+
+      BetHandler.handle_bet(a.name, true, 1)
+      for_victory = BetHandler.summarise_round
+
+      BetHandler.start_new_round
+
+      BetHandler.handle_bet(b.name, false, 1)
+      for_loss = BetHandler.summarise_round
+
+      BetHandler.start_new_round
+
+      BetHandler.handle_bet(a.name, true, 1)
+      BetHandler.handle_bet(b.name, false, 1)
+      even_split = BetHandler.summarise_round
+
+      responses = [no_bets, for_victory, for_loss, even_split]
+
+      assert !responses.any?(&:nil?)
+      assert_equal responses.length, responses.uniq.length
+    end
+  end
+
   def test_paying_out
     temporarily do
       correct = User.get 'correct'
