@@ -1,12 +1,36 @@
 require 'minitest/autorun'
-require_relative '../bet_handler.rb'
+require_relative '../gambling/bet_handler.rb'
 
 class BetHandlerTest < Minitest::Unit::TestCase
-  # In-Memory Table
-  DB = Sequel.sqlite
+
+  def test_paying_out
+    temporarily do
+      correct = User.get 'correct'
+      correct_coins = correct.coins
+      wrong   = User.get 'wrong'
+      wrong_coins = wrong.coins
+
+      result = true
+
+      BetHandler.start_new_round
+
+      r = BetHandler.handle_bet(correct.name, result, correct_coins / 2)
+      assert r.success
+
+      r = BetHandler.handle_bet(wrong.name, !result, wrong_coins / 2)
+      assert r.success
+
+      BetHandler.payout(result)
+
+      correct.reload
+      wrong.reload
+      assert_equal correct.coins, (correct_coins + (correct_coins / 2))
+      assert_equal wrong.coins, wrong_coins / 2
+    end
+  end
 
   def test_rounds_for_and_against
-    with_clean_db do
+    temporarily do
       BetHandler.start_new_round
 
       assert_equal 0, BetHandler.instance_eval { this_round.count }
@@ -36,7 +60,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
   end
 
   def test_handle_bet_only_allows_one_bet
-    with_clean_db do
+    temporarily do
       BetHandler.start_new_round
 
       username = "username"
@@ -53,7 +77,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
   end
 
   def test_handle_bet_only_allows_betting_within_budget
-    with_clean_db do
+    temporarily do
       BetHandler.start_new_round
 
       valid_user = User.get "valid"
@@ -84,14 +108,12 @@ class BetHandlerTest < Minitest::Unit::TestCase
 
   private
 
-  def with_clean_db(&block)
-    User.create_table?
-    Round.create_table?
-    Bet.create_table?
-
-    block.call
-
-    DB.drop_table?(:bets, :rounds, :users)
+  DB = Sequel.sqlite
+  # Run the tests on an in-memory SQLite database
+  def temporarily(&block)
+    Sequel::Model.db.transaction(:rollback => :always, :auto_savepoint=>true) do
+      block.call
+    end
   end
 
 end
