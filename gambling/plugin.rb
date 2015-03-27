@@ -1,4 +1,3 @@
-require 'yaml'
 require_relative '../rubby_module.rb'
 require_relative './responder.rb'
 

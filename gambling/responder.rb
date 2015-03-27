@@ -1,10 +1,16 @@
+require 'yaml'
+
 require_relative './bet_handler.rb'
 
 # For each supported scenario, this module responds by yielding an array of lines to reply with
 module GamblingResponder
   extend self
 
-  Config = YAML.load_file(__dir__ + '/jaggcoins_config.yaml')
+  begin
+    Config = YAML.load_file(__dir__ + '/jaggcoins_config.yaml')
+  rescue
+    Config = {}
+  end
 
   attr_accessor :accept_bets
 

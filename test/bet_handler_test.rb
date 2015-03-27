@@ -138,14 +138,4 @@ class BetHandlerTest < Minitest::Unit::TestCase
     end
   end
 
-  private
-
-  DB = Sequel.sqlite
-  # Run the tests on an in-memory SQLite database
-  def temporarily(&block)
-    Sequel::Model.db.transaction(:rollback => :always, :auto_savepoint=>true) do
-      block.call
-    end
-  end
-
 end

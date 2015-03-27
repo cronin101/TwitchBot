@@ -2,6 +2,7 @@
 source 'https://rubygems.org'
 
 gem 'cinch'
+gem 'cinch-test'
 gem 'rake'
 gem 'sequel'
 gem 'sqlite3'
