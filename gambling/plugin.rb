@@ -34,8 +34,8 @@ class GamblingPlugin
   # COMMANDS FOR EVERYONE: #
     # A user can ask for an explanation of the betting system
     match /jaggcoins$/i,
-      method: (defn :explanation,
-               -> m { Responder.get_explanation &Replier.(m) })
+      method: (timeout 60, (defn :explanation,
+               -> m { Responder.get_explanation &Replier.(m) }))
 
     # A user can place a bet on victory
     match /bet\s(?:win|victory)\s(\d+)$/i,
@@ -54,8 +54,8 @@ class GamblingPlugin
 
     # A user can display the highscores
     match /highscores$/,
-      method: (defn :highscore,
-               -> m { Responder.get_highscores(&Replier.(m)) })
+      method: (timeout 60, (defn :highscore,
+               -> m { Responder.get_highscores(&Replier.(m)) }))
 
   # COMMANDS FOR MODS: #
     # A mod can open a round of betting
