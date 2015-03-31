@@ -3,13 +3,6 @@ require_relative '../gambling/responder.rb'
 
 class GamblingResponderTest < Minitest::Unit::TestCase
   GamblingResponder::Config = {}
-  GamblingResponder::Config['mods'] = ['mod']
-  GamblingResponder::Config['explanation'] = "explanation"
-
-  def test_is_mod
-    assert GamblingResponder.is_mod? 'mod'
-    assert !(GamblingResponder.is_mod? 'non-mod')
-  end
 
   def test_get_explanation
     GamblingResponder.get_explanation { |e| assert e }

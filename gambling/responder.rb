@@ -10,10 +10,6 @@ module GamblingResponder
 
   attr_accessor :accept_bets
 
-  def is_mod? sender
-    Config['mods'].include? sender
-  end
-
   def get_explanation
     yield [Config['explanation']]
   end
