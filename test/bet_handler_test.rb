@@ -1,14 +1,19 @@
 require_relative './test_helper.rb'
 require_relative '../gambling/bet_handler.rb'
 
+# Stub HTTP call to Twitch API
+def BetHandler.is_subscriber? u
+  false
+end
+
 class BetHandlerTest < Minitest::Unit::TestCase
 
   def test_summariser
     temporarily do
       BetHandler.start_new_round
 
-      a = User.get 'a'
-      b = User.get 'b'
+      a = User.get 'a', false
+      b = User.get 'b', false
 
       no_bets = BetHandler.summarise_round
 
@@ -37,9 +42,9 @@ class BetHandlerTest < Minitest::Unit::TestCase
 
   def test_paying_out
     temporarily do
-      correct = User.get 'correct'
+      correct = User.get 'correct', false
       correct_coins = correct.coins
-      wrong   = User.get 'wrong'
+      wrong   = User.get 'wrong', false
       wrong_coins = wrong.coins
 
       result = true
@@ -96,7 +101,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
       BetHandler.start_new_round
 
       username = "username"
-      user = User.get username
+      user = User.get username, false
 
       # Placing a first bet should succeed
       response = BetHandler.handle_bet(username, true, user.coins / 2)
@@ -108,13 +113,20 @@ class BetHandlerTest < Minitest::Unit::TestCase
     end
   end
 
+  def test_initial_coins_varies_depending_on_whether_subscribed
+    temporarily do
+      assert_equal User::SUB_COINS, (User.get "subbed_user", true).coins
+      assert_equal User::NON_SUB_COINS, (User.get "non_subbed_user", false).coins
+    end
+  end
+
   def test_handle_bet_only_allows_betting_within_budget
     temporarily do
       BetHandler.start_new_round
 
-      valid_user = User.get "valid"
+      valid_user = User.get "valid", false
 
-      invalid_user = User.get "invalid"
+      invalid_user = User.get "invalid", false
 
       # Placing a bet within budget should succeed
       remaining = 0

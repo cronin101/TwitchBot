@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 gem 'cinch'
 gem 'cinch-test'
+gem 'httparty'
 gem 'rake'
 gem 'sequel'
 gem 'sqlite3'

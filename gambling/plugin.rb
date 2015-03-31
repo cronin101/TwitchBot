@@ -1,9 +1,15 @@
 require_relative '../rubby_module.rb'
 require_relative './responder.rb'
+require_relative './bet_handler.rb'
+
+def op?(message)
+  sender = message.user.name
+  message.channel.opped?(sender)
+end
 
 class GamblingPlugin
-  extend Rubby
   include Cinch::Plugin
+  extend Rubby
 
   Responder = GamblingResponder
 
@@ -12,8 +18,7 @@ class GamblingPlugin
     method_name.tap do |name|
       body = instance_method name
       define_method name do |*args, &block|
-        sender = args.first.user.name
-        body.bind(self).call(*args, &block) if Responder.is_mod? sender
+        body.bind(self).call(*args, &block) if op?(args.first)
       end
     end
   end
@@ -21,7 +26,6 @@ class GamblingPlugin
   def self.mods_only name, block
     mod_command defn name, block
   end
-
 
   # Sugar for interacting with IRC:
     # Given a message, returns a function that will reply using an array of response lines
@@ -33,7 +37,7 @@ class GamblingPlugin
   # COMMANDS FOR EVERYONE: #
     # A user can ask for an explanation of the betting system
     match /jaggcoins$/i,
-      method: (timeout 60, (defn :explanation,
+      method: (throttle 60, (defn :explanation,
                -> m { Responder.get_explanation &Replier.(m) }))
 
     # A user can place a bet on victory
@@ -53,7 +57,7 @@ class GamblingPlugin
 
     # A user can display the highscores
     match /highscores$/,
-      method: (timeout 60, (defn :highscore,
+      method: (throttle 60, (defn :highscore,
                -> m { Responder.get_highscores(&Replier.(m)) }))
 
   # COMMANDS FOR MODS: #

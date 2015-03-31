@@ -23,12 +23,12 @@ class GamblingResponderTest < Minitest::Unit::TestCase
         assert_equal 0, h.count
       end
 
-      User.get '1'
-      User.get '2'
-      User.get '3'
-      User.get '4'
-      User.get '5'
-      User.get '6'
+      User.get '1', false
+      User.get '2', false
+      User.get '3', false
+      User.get '4', false
+      User.get '5', false
+      User.get '6', false
 
       GamblingResponder.get_highscores do |h|
         assert h

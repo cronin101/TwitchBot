@@ -1,3 +1,4 @@
+require 'httparty'
 require_relative './database.rb'
 
 module BetHandler
@@ -5,6 +6,12 @@ module BetHandler
   attr_accessor :current_round
 
   extend self
+
+  JagToken = YAML.load_file(__dir__ + '/../auth.yaml')['jag_token']
+
+  def is_subscriber?(user)
+    (HTTParty.get "https://api.twitch.tv/kraken/channels/jaggerous/subscriptions/#{user}?oauth_token=#{JagToken}").code == 200
+  end
 
   def start_new_round
     new_round = Round.create
@@ -38,7 +45,7 @@ module BetHandler
     amount = amount.to_i
 
     # User needs to be found or created.
-    user = User.get(username)
+    user = User.get(username, is_subscriber?(username))
 
     if Bet.where(round: self.current_round, user_id: user.id).any?
       return Response.new.tap do |r|

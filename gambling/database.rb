@@ -4,6 +4,9 @@ require 'sqlite3'
 DB = Sequel.sqlite( __dir__ + '/jaggerous.db')
 
 class User < Sequel::Model(:users)
+  SUB_COINS     = 200
+  NON_SUB_COINS = 100
+
   def self.create_table?
     DB.create_table? :users do
       primary_key :id
@@ -12,8 +15,8 @@ class User < Sequel::Model(:users)
     end
   end
 
-  def self.get(name)
-    User.find_or_create(name: name) { |u| u.coins = 100 }
+  def self.get(name, is_sub)
+    User.find_or_create(name: name) { |u| u.coins =  is_sub ? SUB_COINS : NON_SUB_COINS }
   end
 end
 
