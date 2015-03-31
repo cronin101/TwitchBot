@@ -7,7 +7,7 @@ module BetHandler
 
   extend self
 
-  JagToken = YAML.load_file(__dir__ + '/../auth.yaml')['jag_token']
+  JagToken = YAML.load_file(__dir__ + '/../auth.yaml')['jag_token'] rescue ""
 
   def is_subscriber?(user)
     (HTTParty.get "https://api.twitch.tv/kraken/channels/jaggerous/subscriptions/#{user}?oauth_token=#{JagToken}").code == 200

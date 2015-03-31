@@ -6,11 +6,7 @@ require_relative './bet_handler.rb'
 module GamblingResponder
   extend self
 
-  begin
-    Config = YAML.load_file(__dir__ + '/jaggcoins_config.yaml')
-  rescue
-    Config = {}
-  end
+  Config = YAML.load_file(__dir__ + '/jaggcoins_config.yaml') rescue {}
 
   attr_accessor :accept_bets
 
