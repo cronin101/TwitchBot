@@ -108,7 +108,7 @@ module BetHandler
 
   def average_of bets
     amounts = bets.map(&:amount)
-    amounts.inject(:+).to_f / amounts.count rescue 0
+    (amounts.inject(:+).to_f / amounts.count rescue 0).round(2)
   end
 
   def this_round
