@@ -56,6 +56,14 @@ module GamblingResponder
     end
   end
 
+  def reset_round
+    if !self.accept_bets
+      yield BetHandler.reset_round
+    else
+      ["Betting is still open..."]
+    end
+  end
+
   def place_bet(username, on_victory, amount)
     if amount.to_i.zero?
       yield ["#{username}: Don't be afraid to dream a little bigger, darling."]

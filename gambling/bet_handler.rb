@@ -18,6 +18,16 @@ module BetHandler
     self.current_round = new_round.number
   end
 
+  def reset_round
+    this_round.map do |bet|
+      user = User.find(id: bet.user_id)
+      user.coins += bet.amount
+      user.save
+
+      "#{user.name}: You now have #{user.coins} jaggCoins! (Refunded #{bet.amount})"
+    end.unshift "The round has been RESET!"
+  end
+
   def payout(victory)
     bets = victory ? bets_for : bets_against
     bets.map do |bet|
@@ -27,7 +37,7 @@ module BetHandler
       user.save
 
       "#{user.name}: You now have #{user.coins} jaggCoins! (+ #{bet.amount})"
-    end
+    end.unshift "The round has ended in #{victory ? 'VICTORY' : 'DEFEAT'}!"
   end
 
   def summarise_round
@@ -68,14 +78,14 @@ module BetHandler
 
       return Response.new.tap do |r|
         r.success = true
-        r.messages = ["Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"]
+        r.messages = ["#{username}: Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"]
       end
 
     else
 
       return Response.new.tap do |r|
         r.success = false
-        r.messages = ["Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."]
+        r.messages = ["#{username} Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."]
       end
     end
   end

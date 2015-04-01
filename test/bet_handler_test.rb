@@ -40,6 +40,26 @@ class BetHandlerTest < Minitest::Unit::TestCase
     end
   end
 
+  def test_refunding
+    temporarily do
+      BetHandler.start_new_round
+
+      better = User.get('better', false)
+
+      assert_equal User::NON_SUB_COINS, better.coins
+
+      BetHandler.handle_bet(better.name, true, better.coins / 2)
+
+      better.reload
+      assert_equal (User::NON_SUB_COINS / 2), better.coins
+
+      BetHandler.reset_round
+
+      better.reload
+      assert_equal User::NON_SUB_COINS, better.coins
+    end
+  end
+
   def test_paying_out
     temporarily do
       correct = User.get 'correct', false

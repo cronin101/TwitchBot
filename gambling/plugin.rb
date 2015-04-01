@@ -71,6 +71,11 @@ class GamblingPlugin
       method: (mods_only :bets_closed,
                -> m { Responder.disable_betting(&Replier.(m)) })
 
+    # A mod can reset the round of betting
+    match /reset$/i,
+      method: (mods_only :reset,
+               -> m { Responder.reset_round(&Replier.(m)) })
+
     # A mod can record the game outcome as a victory
     match /won$/i,
       method: (mods_only :record_win,
