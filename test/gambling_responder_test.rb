@@ -10,6 +10,7 @@ class GamblingResponderTest < Minitest::Unit::TestCase
 
   def test_get_highscores
     temporarily do
+      Bet.all.map &:delete
       User.all.map &:delete
       GamblingResponder.get_highscores do |h|
         assert h
