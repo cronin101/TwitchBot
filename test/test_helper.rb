@@ -1,4 +1,9 @@
 require 'codeclimate-test-reporter'
+
+require_relative '../logging.rb'
+
+Log.remove_appenders Logfile
+
 CodeClimate::TestReporter.start
 
 require 'minitest/autorun'

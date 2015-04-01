@@ -1,5 +1,6 @@
 require 'httparty'
 require_relative './database.rb'
+require_relative '../logging.rb'
 
 module BetHandler
 
@@ -10,15 +11,19 @@ module BetHandler
   JagToken = YAML.load_file(__dir__ + '/../auth.yaml')['jag_token'] rescue ""
 
   def is_subscriber?(user)
-    (HTTParty.get "https://api.twitch.tv/kraken/channels/jaggerous/subscriptions/#{user}?oauth_token=#{JagToken}").code == 200
+    code = (HTTParty.get "https://api.twitch.tv/kraken/channels/jaggerous/subscriptions/#{user}?oauth_token=#{JagToken}").code
+    Log.info "Status code for #{user} was #{code}"
+    code == 200
   end
 
   def start_new_round
+    Log.info "New round started"
     new_round = Round.create
     self.current_round = new_round.number
   end
 
   def reset_round
+    Log.info "Round reset"
     this_round.map do |bet|
       user = User.find(id: bet.user_id)
       user.coins += bet.amount
@@ -29,6 +34,7 @@ module BetHandler
   end
 
   def payout(victory)
+    Log.info "Payout started. victory == #{victory.inspect}"
     bets = victory ? bets_for : bets_against
     bets.map do |bet|
       payout = 2 * bet.amount
@@ -58,6 +64,7 @@ module BetHandler
     user = User.get(username, is_subscriber?(username))
 
     if Bet.where(round: self.current_round, user_id: user.id).any?
+      Log.info "Bet by #{username} rejected as duplicate"
       return Response.new.tap do |r|
         r.success = false
         r.messages = ["Sorry, you can only bet once per round!"]
@@ -76,12 +83,15 @@ module BetHandler
       user.coins -= amount
       user.save
 
+      Log.info "Bet for #{amount} placed by #{username} on #{on_victory ? 'victory' : 'defeat'}"
+
       return Response.new.tap do |r|
         r.success = true
         r.messages = ["#{username}: Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"]
       end
 
     else
+      Log.info "Bet by #{username} rejected for insufficient funds"
 
       return Response.new.tap do |r|
         r.success = false
