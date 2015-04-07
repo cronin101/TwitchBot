@@ -22,7 +22,7 @@ module GamblingResponder
 
   def get_balance(name)
     user = User.get(name, -> { BetHandler.is_subscriber?(name) })
-    yield ["#{name}: You have #{user.coins} jaggCoins!"]
+    yield ["#{name}: You have #{user.coins} jaggCoins! (Rank #{user.rank})"]
   end
 
   def record_outcome(outcome_is_victory)

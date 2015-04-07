@@ -30,7 +30,7 @@ module BetHandler
       user.coins += bet.amount
       user.save
 
-      "#{user.name}: You now have #{user.coins} jaggCoins! (Refunded #{bet.amount})"
+      "#{user.name}: You are now rank #{user.rank} with #{user.coins} jaggCoins! (Refunded #{bet.amount})"
     end.unshift "The round has been RESET!").tap { |response| start_new_round }
   end
 
@@ -46,7 +46,7 @@ module BetHandler
       user.coins += payout
       user.save
 
-      "#{user.name}: You now have #{user.coins} jaggCoins! (+ #{bet.amount})"
+      "#{user.name}: You are now rank #{user.rank} with #{user.coins} jaggCoins! (+ #{bet.amount})"
     end.unshift "The round has ended in #{victory ? 'VICTORY' : 'DEFEAT'}!"
   end
 

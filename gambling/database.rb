@@ -15,6 +15,11 @@ class User < Sequel::Model(:users)
     end
   end
 
+  def rank
+    my_coins = self.coins
+    User.where { coins > my_coins }.count + 1
+  end
+
   def self.get(name, is_sub_check)
     User.find_or_create(name: name) { |u| u.coins =  is_sub_check.() ? SUB_COINS : NON_SUB_COINS }
   end
