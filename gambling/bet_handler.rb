@@ -4,7 +4,7 @@ require_relative '../logging.rb'
 
 module BetHandler
 
-  attr_accessor :current_round
+  attr_accessor :current_round, :has_paid_out
 
   extend self
 
@@ -20,20 +20,24 @@ module BetHandler
     Log.info "New round started"
     new_round = Round.create
     self.current_round = new_round.number
+    self.has_paid_out = false
   end
 
   def reset_round
     Log.info "Round reset"
-    this_round.map do |bet|
+    (this_round.map do |bet|
       user = User.find(id: bet.user_id)
       user.coins += bet.amount
       user.save
 
       "#{user.name}: You now have #{user.coins} jaggCoins! (Refunded #{bet.amount})"
-    end.unshift "The round has been RESET!"
+    end.unshift "The round has been RESET!").tap { |response| start_new_round }
   end
 
   def payout(victory)
+    return "Payout has already occured!" if self.has_paid_out
+
+    self.has_paid_out = true
     Log.info "Payout started. victory == #{victory.inspect}"
     bets = victory ? bets_for : bets_against
     bets.map do |bet|

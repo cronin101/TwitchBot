@@ -133,6 +133,31 @@ class BetHandlerTest < Minitest::Unit::TestCase
     end
   end
 
+  def test_payout_can_only_occur_once
+    temporarily do
+      BetHandler.start_new_round
+
+      username = 'Better'
+      user = User.get username, false
+
+      assert_equal User::NON_SUB_COINS, user.reload.coins
+
+      result = true
+
+      response = BetHandler.handle_bet(username, result, user.reload.coins / 2)
+
+      assert_equal (User::NON_SUB_COINS / 2).to_i, user.reload.coins
+
+      BetHandler.payout(result)
+
+      assert_equal (User::NON_SUB_COINS * 1.5).to_i, user.reload.coins
+
+      BetHandler.payout(result)
+
+      assert_equal (User::NON_SUB_COINS * 1.5).to_i, user.reload.coins
+    end
+  end
+
   def test_initial_coins_varies_depending_on_whether_subscribed
     temporarily do
       assert_equal User::SUB_COINS, (User.get "subbed_user", true).coins
