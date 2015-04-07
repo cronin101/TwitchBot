@@ -15,8 +15,8 @@ class User < Sequel::Model(:users)
     end
   end
 
-  def self.get(name, is_sub)
-    User.find_or_create(name: name) { |u| u.coins =  is_sub ? SUB_COINS : NON_SUB_COINS }
+  def self.get(name, is_sub_check)
+    User.find_or_create(name: name) { |u| u.coins =  is_sub_check.() ? SUB_COINS : NON_SUB_COINS }
   end
 end
 

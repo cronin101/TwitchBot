@@ -12,8 +12,8 @@ class BetHandlerTest < Minitest::Unit::TestCase
     temporarily do
       BetHandler.start_new_round
 
-      a = User.get 'a', false
-      b = User.get 'b', false
+      a = User.get 'a', -> { false }
+      b = User.get 'b', -> { false }
 
       no_bets = BetHandler.summarise_round
 
@@ -44,7 +44,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
     temporarily do
       BetHandler.start_new_round
 
-      better = User.get('better', false)
+      better = User.get('better', -> { false })
 
       assert_equal User::NON_SUB_COINS, better.coins
 
@@ -62,9 +62,9 @@ class BetHandlerTest < Minitest::Unit::TestCase
 
   def test_paying_out
     temporarily do
-      correct = User.get 'correct', false
+      correct = User.get 'correct', -> { false }
       correct_coins = correct.coins
-      wrong   = User.get 'wrong', false
+      wrong   = User.get 'wrong', -> { false }
       wrong_coins = wrong.coins
 
       result = true
@@ -121,7 +121,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
       BetHandler.start_new_round
 
       username = "username"
-      user = User.get username, false
+      user = User.get username, -> { false }
 
       # Placing a first bet should succeed
       response = BetHandler.handle_bet(username, true, user.coins / 2)
@@ -138,7 +138,7 @@ class BetHandlerTest < Minitest::Unit::TestCase
       BetHandler.start_new_round
 
       username = 'Better'
-      user = User.get username, false
+      user = User.get username, -> { false }
 
       assert_equal User::NON_SUB_COINS, user.reload.coins
 
@@ -160,8 +160,8 @@ class BetHandlerTest < Minitest::Unit::TestCase
 
   def test_initial_coins_varies_depending_on_whether_subscribed
     temporarily do
-      assert_equal User::SUB_COINS, (User.get "subbed_user", true).coins
-      assert_equal User::NON_SUB_COINS, (User.get "non_subbed_user", false).coins
+      assert_equal User::SUB_COINS, (User.get "subbed_user", -> { true }).coins
+      assert_equal User::NON_SUB_COINS, (User.get "non_subbed_user", -> { false }).coins
     end
   end
 
@@ -169,9 +169,9 @@ class BetHandlerTest < Minitest::Unit::TestCase
     temporarily do
       BetHandler.start_new_round
 
-      valid_user = User.get "valid", false
+      valid_user = User.get "valid", -> { false }
 
-      invalid_user = User.get "invalid", false
+      invalid_user = User.get "invalid", -> { false }
 
       # Placing a bet within budget should succeed
       remaining = 0

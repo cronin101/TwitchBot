@@ -65,7 +65,7 @@ module BetHandler
     amount = amount.to_i
 
     # User needs to be found or created.
-    user = User.get(username, is_subscriber?(username))
+    user = User.get(username, -> { is_subscriber?(username) })
 
     if Bet.where(round: self.current_round, user_id: user.id).any?
       Log.info "Bet by #{username} rejected as duplicate"
