@@ -19,7 +19,7 @@ namespace :db do
         # Joining on the Foreign Key
         user_id: :id)
 
-    eligible.each { |u| u.coins += added_coins and u.save }
+    eligible.each { |u| u.reload and u.coins += added_coins and u.save }
   end
 
   task :create do
