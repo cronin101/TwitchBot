@@ -61,50 +61,54 @@ module BetHandler
   end
 
   Response = Struct.new(:success, :messages)
+
   def handle_bet(username, on_victory, amount)
     amount = amount.to_i
 
     # User needs to be found or created.
     user = User.get(username, -> { is_subscriber?(username) })
 
-    if Bet.where(round: self.current_round, user_id: user.id).any?
-      Log.info "Bet by #{username} rejected as duplicate"
-      return Response.new.tap do |r|
-        r.success = false
-        r.messages = ["Sorry, you can only bet once per round!"]
-      end
-    end
+    # User can only make one bet per round
+    return duplicate_bet_response(username) if has_made_bet_this_round?(user)
 
     # User needs to have enough coins to make the bet
     if user.coins >= amount.to_i
-      Bet.create do |bet|
-        bet.user_id = user.id
-        bet.round = self.current_round
-        bet.is_on_victory = on_victory
-        bet.amount = amount
-      end
-
-      user.coins -= amount
-      user.save
-
-      Log.info "Bet for #{amount} placed by #{username} on #{on_victory ? 'victory' : 'defeat'}"
-
-      return Response.new.tap do |r|
-        r.success = true
-        r.messages = ["#{username}: Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"]
-      end
-
+      new_bet_response(user, on_victory, amount)
     else
-      Log.info "Bet by #{username} rejected for insufficient funds"
-
-      return Response.new.tap do |r|
-        r.success = false
-        r.messages = ["#{username} Sorry, you don't have the funds to make that wager! You only have #{user.coins} jaggCoins in your piggy-bank."]
-      end
+      insufficient_funds_response(username, user.coins)
     end
   end
 
   private
+
+  def duplicate_bet_response(username)
+    Log.info "Bet by #{username} rejected as duplicate"
+    Response.new(false, ["#{username}: Sorry, you can only bet once per round!"])
+  end
+
+  def new_bet_response(user, on_victory, amount)
+    Bet.create do |bet|
+      bet.user_id = user.id
+      bet.round = self.current_round
+      bet.is_on_victory = on_victory
+      bet.amount = amount
+    end
+
+    user.coins -= amount
+    user.save
+
+    Log.info "Bet for #{amount} placed by #{user.name} on #{on_victory ? 'victory' : 'defeat'}"
+    Response.new(true, ["#{user.name}: Staking #{amount} jaggCoins on #{on_victory ? 'victory' : 'defeat'}. You have #{user.coins} remaining!"])
+  end
+
+  def insufficient_funds_response(username, coins)
+    Log.info "Bet by #{username} rejected for insufficient funds"
+    Response.new(false, ["#{username} Sorry, you don't have the funds to make that wager! You only have #{coins} jaggCoins in your piggy-bank."])
+  end
+
+  def has_made_bet_this_round?(user)
+    Bet.where(round: self.current_round, user_id: user.id).any?
+  end
 
   def total_of bets
     bets.map(&:amount).inject(:+) || 0
