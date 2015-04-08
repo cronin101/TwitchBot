@@ -5,18 +5,6 @@ require_relative '../rubby_module.rb'
 class RubbyModuleTest < Minitest::Unit::TestCase
   extend Rubby
 
-  def test_defn
-    assert !respond_to?(:new_method)
-
-    called = false
-    self.class.defn :new_method, -> { called = true }
-    assert respond_to?(:new_method)
-
-    new_method
-
-    assert called
-  end
-
   class Throttled
     extend Rubby
 
