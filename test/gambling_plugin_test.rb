@@ -2,10 +2,8 @@ require 'cinch'
 require 'cinch/test'
 
 require_relative './test_helper.rb'
-require_relative "../rubby_module.rb"
 require_relative '../gambling/plugin.rb'
 
-# Stub the GamblingResponder to avoid side-effects
 class GamblingPluginTest < Minitest::Unit::TestCase
   include Cinch::Test
 
@@ -35,10 +33,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot should respond to user commands
       USER_COMMANDS.each do |com|
         temporarily do
-          bot = make_bot(GamblingPlugin)
-          assert (bot.is_a? Cinch::Bot)
-          message = make_message(bot, com)
-          replies = get_replies(message)
+          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
           assert replies.length > 0, "Responds to #{com} from user"
           replies.each { |reply| assert_equal true, reply.text }
         end
@@ -47,10 +42,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot shouldn't respond to mod commands
       MOD_COMMANDS.each do |com|
         temporarily do
-          bot = make_bot(GamblingPlugin)
-          assert (bot.is_a? Cinch::Bot)
-          message = make_message(bot, com)
-          replies = get_replies(message)
+          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
           assert replies.length == 0, "Doesn't repond to #{com} from user"
         end
       end
@@ -66,10 +58,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot should respond to all commands
       (USER_COMMANDS + MOD_COMMANDS).each do |com|
         temporarily do
-          bot = make_bot(GamblingPlugin)
-          assert (bot.is_a? Cinch::Bot)
-          message = make_message(bot, com)
-          replies = get_replies(message)
+          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
           assert replies.length > 0, "Responds to #{com} from mod"
           replies.each { |reply| assert_equal true, reply.text }
         end
