@@ -92,6 +92,7 @@ module BetHandler
       bet.round = self.current_round
       bet.is_on_victory = on_victory
       bet.amount = amount
+      bet.bet_time = DateTime.now
     end
 
     user.coins -= amount

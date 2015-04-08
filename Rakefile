@@ -8,6 +8,20 @@ end
 
 namespace :db do
 
+  task :add_daily_coins do
+    added_coins = 10
+
+    eligible = User.join_table(
+        # Users with associated bets...
+        :inner,
+        # ...Placed within the last 24h, limiting one per user
+        Bet.where { bet_time > (DateTime.now - 1) }.select(:user_id).distinct,
+        # Joining on the Foreign Key
+        user_id: :id)
+
+    eligible.each { |u| u.coins += added_coins and u.save }
+  end
+
   task :create do
     puts 'Creating users table'
     User.create_table?

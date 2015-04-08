@@ -41,6 +41,7 @@ class Bet < Sequel::Model(:bets)
       foreign_key :user_id, :users, null: false
       Integer :amount, null: false
       TrueClass :is_on_victory, null: false
+      DateTime :bet_time, null: false
     end
   end
 end
