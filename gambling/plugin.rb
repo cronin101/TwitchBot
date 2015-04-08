@@ -67,7 +67,7 @@ class GamblingPlugin
                -> m { Responder.enable_betting(&Replier.(m)) })
 
     # A mod can close the round of betting
-    match /bets\sclosed$/i,
+    match /bets\s(?:closed|close)$/i,
       method: (mods_only :bets_closed,
                -> m { Responder.disable_betting(&Replier.(m)) })
 

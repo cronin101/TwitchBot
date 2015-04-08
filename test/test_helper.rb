@@ -17,6 +17,7 @@ end
 def without_throttling(&block)
   Rubby::THROTTLING[:active] = false
   block.call
+ensure
   Rubby::THROTTLING[:active] = true
 end
 

@@ -15,7 +15,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
                   ]
 
   MOD_COMMANDS =  [
-                    "!won", "!lost", "!bets open", "!bets closed", "!reset"
+                    "!won", "!lost", "!bets open", "!bets closed", "!bets close", "!reset"
                   ]
 
   module NewResponder
