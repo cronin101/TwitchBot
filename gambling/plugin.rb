@@ -31,17 +31,17 @@ class GamblingPlugin
 
     # A user can place a bet on victory
     match /bet\s(?:win|victory)\s(\d+)$/i, method: (def bet_win msg, amount
-      Responder.place_bet((author_of msg), true, amount, &(response_stream msg))
+      Responder.place_bet(msg.user.name, true, amount, &(response_stream msg))
     end)
 
     # A user can place a bet on defeat
     match /bet\s(?:lose|loss|defeat)\s(\d+)$/i, method: (def bet_lose msg, amount
-      Responder.place_bet((author_of msg), false, amount, &(response_stream msg))
+      Responder.place_bet(msg.user.name, false, amount, &(response_stream msg))
     end)
 
     # A user can display their balance
     match /balance$/, method: (def balance msg
-      Responder.get_balance((author_of msg), &(response_stream msg))
+      Responder.get_balance(msg.user.name, &(response_stream msg))
     end)
 
     # A user can display the highscores
@@ -79,10 +79,6 @@ class GamblingPlugin
 
     def response_stream msg
       -> response { response.each { |l| msg.reply l } }
-    end
-
-    def author_of msg
-      msg.user.name
     end
 
 end
