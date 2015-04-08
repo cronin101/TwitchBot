@@ -23,67 +23,66 @@ class GamblingPlugin
     end
   end
 
-  def self.mods_only name, block
-    mod_command defn name, block
-  end
-
-  # Sugar for interacting with IRC:
-    # Given a message, returns a function that will reply using an array of response lines
-    Replier = -> m { -> ls { ls.each { |l| m.reply l } } }
-
-    # Given a message, returns the username of the author
-    Nameof  = -> m { m.user.name }
-
   # COMMANDS FOR EVERYONE: #
     # A user can ask for an explanation of the betting system
-    match /jaggcoins$/i,
-      method: (throttle 60, (defn :explanation,
-               -> m { Responder.get_explanation &Replier.(m) }))
+    match /jaggcoins$/i, method: (throttle 60, def explanation msg
+      Responder.get_explanation &(response_stream msg)
+    end)
 
     # A user can place a bet on victory
-    match /bet\s(?:win|victory)\s(\d+)$/i,
-      method: (defn :bet_win,
-               ->(m, amount) { Responder.place_bet(Nameof.(m), true, amount, &Replier.(m)) })
+    match /bet\s(?:win|victory)\s(\d+)$/i, method: (def bet_win msg, amount
+      Responder.place_bet((author_of msg), true, amount, &(response_stream msg))
+    end)
 
     # A user can place a bet on defeat
-    match /bet\s(?:lose|loss|defeat)\s(\d+)$/i,
-      method: (defn :bet_lose,
-               ->(m, amount) { Responder.place_bet(Nameof.(m), false, amount, &Replier.(m)) })
+    match /bet\s(?:lose|loss|defeat)\s(\d+)$/i, method: (def bet_lose msg, amount
+      Responder.place_bet((author_of msg), false, amount, &(response_stream msg))
+    end)
 
     # A user can display their balance
-    match /balance$/,
-      method: (defn :balance,
-               -> m { Responder.get_balance(Nameof.(m), &Replier.(m)) })
+    match /balance$/, method: (def balance msg
+      Responder.get_balance((author_of msg), &(response_stream msg))
+    end)
 
     # A user can display the highscores
-    match /highscores$/,
-      method: (throttle 60, (defn :highscore,
-               -> m { Responder.get_highscores(&Replier.(m)) }))
+    match /highscores$/, method: (throttle 60, def highscores msg
+      Responder.get_highscores &(response_stream msg)
+    end)
 
   # COMMANDS FOR MODS: #
     # A mod can open a round of betting
-    match /bets\sopen$/i,
-      method: (mods_only :bets_open,
-               -> m { Responder.enable_betting(&Replier.(m)) })
+    match /bets\sopen$/i, method: (mod_command def bets_open msg
+      Responder.enable_betting &(response_stream msg)
+    end)
 
     # A mod can close the round of betting
-    match /bets\s(?:closed|close)$/i,
-      method: (mods_only :bets_closed,
-               -> m { Responder.disable_betting(&Replier.(m)) })
+    match /bets\s(?:closed|close)$/i, method: (mod_command def bets_closed msg
+      Responder.disable_betting &(response_stream msg)
+    end)
 
     # A mod can reset the round of betting
-    match /reset$/i,
-      method: (mods_only :reset,
-               -> m { Responder.reset_round(&Replier.(m)) })
+    match /reset$/i, method: (mod_command def reset msg
+      Responder.reset_round &(response_stream msg)
+    end)
 
     # A mod can record the game outcome as a victory
-    match /won$/i,
-      method: (mods_only :record_win,
-               -> m { Responder.record_outcome(true, &Replier.(m)) })
+    match /won$/i, method: (mod_command def record_win msg
+      Responder.record_outcome(true, &(response_stream msg))
+    end)
 
     # A mod can record the game outcome as a loss
-    match /lost$/i,
-      method: (mods_only :record_loss,
-               -> m { Responder.record_outcome(false, &Replier.(m)) })
+    match /lost$/i, method: (mod_command def record_loss msg
+      Responder.record_outcome(false, &(response_stream msg))
+    end)
+
+    private
+
+    def response_stream msg
+      -> response { response.each { |l| msg.reply l } }
+    end
+
+    def author_of msg
+      msg.user.name
+    end
 
 end
