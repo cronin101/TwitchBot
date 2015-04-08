@@ -14,4 +14,9 @@ def temporarily(&block)
   end
 end
 
+def without_throttling(&block)
+  Rubby::THROTTLING[:active] = false
+  block.call
+  Rubby::THROTTLING[:active] = true
+end
 

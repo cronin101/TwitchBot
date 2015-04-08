@@ -2,23 +2,23 @@ require_relative '../rubby_module.rb'
 require_relative './responder.rb'
 require_relative './bet_handler.rb'
 
-def op?(message)
-  sender = message.user.name
-  message.channel.opped?(sender)
-end
-
 class GamblingPlugin
   include Cinch::Plugin
   extend Rubby
 
   Responder = GamblingResponder
 
+  def self.op?(message)
+    sender = message.user.name
+    message.channel.opped?(sender)
+  end
+
   # Decorator to make commands fire only if triggered by a moderator
   def self.mod_command method_name
     method_name.tap do |name|
       body = instance_method name
       define_method name do |*args, &block|
-        body.bind(self).call(*args, &block) if op?(args.first)
+        body.bind(self).call(*args, &block) if GamblingPlugin.op?(args.first)
       end
     end
   end
