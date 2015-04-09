@@ -15,7 +15,7 @@ namespace :db do
         # Users with associated bets...
         :inner,
         # ...Placed within the last 24h, limiting one per user
-        Bet.where { bet_time > (DateTime.now - 1) }.select(:user_id).distinct,
+        Bet.last_24h.select(:user_id).distinct,
         # Joining on the Foreign Key
         user_id: :id)
 

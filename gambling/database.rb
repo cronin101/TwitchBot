@@ -44,5 +44,9 @@ class Bet < Sequel::Model(:bets)
       DateTime :bet_time, null: false
     end
   end
+
+  def self.last_24h
+    self.where { bet_time > (DateTime.now - 1) }
+  end
 end
 
