@@ -51,13 +51,12 @@ module BetHandler
   end
 
   def summarise_round
-    case betting_trend
-    when :no_bets then return ["No bets were placed during the last round!"]
-    when :tie then split_summary
-    when :victory then optimistic_summary
-    when :loss then pessimistic_summary
-    end <<
-      "#{total_of bets_for} jaggCoins placed on Victory (average: #{average_of bets_for}), #{total_of bets_against} placed on Defeat (average: #{average_of bets_against})!"
+    case
+    when !this_round.any? then return ["No bets were placed during the last round!"]
+    when bets_for.count > bets_against.count then optimistic_summary
+    when bets_against.count > bets_for.count then pessimistic_summary
+    when bets_against.count.eql?(bets_for.count) then split_summary
+    end << trend_summary
   end
 
   Response = Struct.new(:success, :messages)
@@ -132,18 +131,6 @@ module BetHandler
     this_round.where(is_on_victory: false)
   end
 
-  def betting_trend
-    if this_round.count == 0
-      :no_bets
-    elsif bets_for.count == bets_against.count
-      :tie
-    elsif bets_for.count > bets_against.count
-      :victory
-    else
-      :loss
-    end
-  end
-
   def split_summary
     ["It's looking pretty uncertain with an even split of #{this_round.count} people.",
      "Half (#{bets_for.count}) expect a win; the same number (#{bets_against.count}) predict a loss!"]
@@ -155,5 +142,11 @@ module BetHandler
 
   def pessimistic_summary
     ["There is a distinct lack of confidence in Jaggerous for the next game, with (#{bets_against.count} / #{this_round.count}) people expecting a loss."]
+  end
+
+  def trend_summary
+    average_for_summary     = " (average: #{average_of bets_for})" if bets_for.any?
+    average_against_summary = " (average: #{average_of bets_against})" if bets_against.any?
+    "#{total_of bets_for} jaggCoins placed on Victory#{average_for_summary}, #{total_of bets_against} placed on Defeat#{average_against_summary}!"
   end
 end
