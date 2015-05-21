@@ -69,6 +69,13 @@ class GamblingResponderTest < Minitest::Unit::TestCase
 
       # All placed bets should remain in the current round
       assert (GamblingResponder.instance_eval { BetHandler.instance_eval { this_round.count }} == 1)
+
+      # Once payout has occurred...
+      GamblingResponder.record_outcome(true){ |m| assert m }
+
+      # ...it should be possible to open the bets again
+      GamblingResponder.enable_betting { |m| assert m }
+      assert GamblingResponder.class_eval { self.accept_bets }
     end
   end
 
