@@ -35,6 +35,10 @@ module GamblingResponder
 
   def enable_betting
     if !self.accept_bets
+      if BetHandler.any_bets_placed?
+        yield ['There are still bets outstanding.', 'Reset the round or declare the outcome!']
+        return
+      end
       self.accept_bets = true
       yield [
         "Betting is now OPEN!",

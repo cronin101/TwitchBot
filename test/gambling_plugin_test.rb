@@ -24,6 +24,13 @@ class GamblingPluginTest < Minitest::Unit::TestCase
 
   GamblingPlugin::Responder = NewResponder
 
+  def new_bot
+    make_bot.tap do |bot|
+      bot.loggers.level = :fatal
+      bot.plugins.register_plugin GamblingPlugin
+    end
+  end
+
   def test_commands_for_user
     without_throttling do
       def GamblingPlugin.op?(*args)
@@ -33,7 +40,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot should respond to user commands
       USER_COMMANDS.each do |com|
         temporarily do
-          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
+          replies = get_replies(make_message(new_bot, com))
           assert replies.length > 0, "Responds to #{com} from user"
           replies.each { |reply| assert_equal true, reply.text }
         end
@@ -42,7 +49,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot shouldn't respond to mod commands
       MOD_COMMANDS.each do |com|
         temporarily do
-          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
+          replies = get_replies(make_message(new_bot, com))
           assert replies.length == 0, "Doesn't repond to #{com} from user"
         end
       end
@@ -58,7 +65,7 @@ class GamblingPluginTest < Minitest::Unit::TestCase
       # The bot should respond to all commands
       (USER_COMMANDS + MOD_COMMANDS).each do |com|
         temporarily do
-          replies = get_replies(make_message(make_bot(GamblingPlugin), com))
+          replies = get_replies(make_message(new_bot, com))
           assert replies.length > 0, "Responds to #{com} from mod"
           replies.each { |reply| assert_equal true, reply.text }
         end

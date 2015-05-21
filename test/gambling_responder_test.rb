@@ -48,6 +48,30 @@ class GamblingResponderTest < Minitest::Unit::TestCase
     end
   end
 
+  def test_opening_bets_before_payout_does_not_reset
+    temporarily do
+      # Bets opened
+      GamblingResponder.enable_betting { |m| assert m }
+      assert GamblingResponder.class_eval { self.accept_bets }
+
+      # Bet placed
+      GamblingResponder.place_bet("username", true, 10) { |m| assert m }
+
+      # Bets closed
+      GamblingResponder.disable_betting { |m| assert m }
+      assert GamblingResponder.class_eval { !self.accept_bets }
+
+      # Bets (accidentally attempted to be) re-opened
+      GamblingResponder.enable_betting { |m| assert m }
+
+      # The bets should remain closed
+      assert GamblingResponder.class_eval { !self.accept_bets }
+
+      # All placed bets should remain in the current round
+      assert (GamblingResponder.instance_eval { BetHandler.instance_eval { this_round.count }} == 1)
+    end
+  end
+
   def test_place_bet
     temporarily do
       GamblingResponder.place_bet("username", true, 10) { |m| assert m }

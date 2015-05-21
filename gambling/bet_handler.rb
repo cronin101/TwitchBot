@@ -78,6 +78,10 @@ module BetHandler
     end
   end
 
+  def any_bets_placed?
+    this_round.any?
+  end
+
   private
 
   def duplicate_bet_response(username)
