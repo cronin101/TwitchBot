@@ -22,6 +22,10 @@ bot = Cinch::Bot.new do
     c.channels        = [creds['channel']]
     c.plugins.plugins = [GamblingPlugin]
   end
+
+  on :connect do |s|
+    bot.irc.send('CAP REQ :twitch.tv/membership')
+  end
 end
 
 bot.start

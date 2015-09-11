@@ -22,6 +22,10 @@ namespace :db do
     eligible.each { |u| u.reload and u.coins += added_coins and u.save }
   end
 
+  task :add_ten_to_all do
+    User.all.each { |u| u.coins += 10 and u.save }
+  end
+
   task :create do
     puts 'Creating users table'
     User.create_table?
