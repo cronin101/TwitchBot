@@ -2,9 +2,12 @@ require_relative '../rubby_module.rb'
 require_relative './responder.rb'
 require_relative './bet_handler.rb'
 
+require 'glutton_ratelimit'
+
 class GamblingPlugin
   include Cinch::Plugin
   extend Rubby
+  extend GluttonRatelimit
 
   Responder = GamblingResponder
 
@@ -77,8 +80,14 @@ class GamblingPlugin
 
     private
 
-    def response_stream msg
-      -> response { response.each { |l| msg.reply l } }
+    def reply(msg, line)
+      msg.reply line
     end
+
+    def response_stream msg
+      -> response { response.each { |l| reply(msg, l) } }
+    end
+
+    rate_limit :reply, 90, 30, GluttonRatelimit::BurstyTokenBucket
 
 end
