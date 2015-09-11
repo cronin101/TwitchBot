@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 gem 'cinch'
 gem 'cinch-test'
+gem 'glutton_ratelimit'
 gem 'httparty'
 gem 'logging'
 gem 'rake'
